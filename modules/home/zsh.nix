@@ -48,6 +48,13 @@
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
     initContent = "printf '\\e[?25l'; fastfetch; printf '\\e[?25h'";
+    sessionVariables = {
+        PRISMA_SCHEMA_ENGINE_BINARY = "/nix/store/np8d1lbcv5xhqxs1laa390rjlmscnrad-prisma-engines_7-7.3.0/bin/schema-engine";
+      };
+
+    shellAliases = {
+      zed = "zeditor";
+    };
 
     oh-my-zsh = {
       enable = true;

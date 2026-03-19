@@ -33,8 +33,8 @@
       -- Keybindings (CTRL+SHIFT based to avoid ALT/$mod conflict)
       config.keys = {
         -- Splits
-        { key = "]", mods = "CTRL|SHIFT", action = wezterm.action.SplitHorizontal { domain = "CurrentPaneDomain" } },
-        { key = "[", mods = "CTRL|SHIFT", action = wezterm.action.SplitVertical   { domain = "CurrentPaneDomain" } },
+        { key = "i", mods = "CTRL|SHIFT", action = wezterm.action.SplitHorizontal { domain = "CurrentPaneDomain" } },
+        { key = "o", mods = "CTRL|SHIFT", action = wezterm.action.SplitVertical   { domain = "CurrentPaneDomain" } },
 
         -- Pane navigation
         { key = "LeftArrow",  mods = "CTRL|SHIFT", action = wezterm.action.ActivatePaneDirection("Left")  },

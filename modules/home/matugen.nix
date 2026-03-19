@@ -37,6 +37,7 @@
     [templates.yazi]
     input_path  = "~/.config/matugen/templates/yazi-theme.toml"
     output_path = "~/.config/yazi/theme.toml"
+
   '';
 
   # WezTerm color template using Material You palette

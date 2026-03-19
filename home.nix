@@ -11,6 +11,10 @@
     vscode
     firefox
     thunar
+    nodejs
+    discord
+    docker-compose
+    bun
 
     # Toggle mic mute and sync the ThinkPad mic LED
     (writeShellScriptBin "toggle-mic" ''

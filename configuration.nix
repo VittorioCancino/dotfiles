@@ -46,6 +46,15 @@
     type = "basic";
   }];
 
+  virtualisation.docker = {
+    enable = true;
+    # optional but useful:
+    enableOnBoot = true;
+    autoPrune.enable = true;
+  };
+
+
+
   time.timeZone = "America/Santiago";
 
   i18n.defaultLocale = "en_US.UTF-8";
@@ -71,7 +80,7 @@
   users.users.vitto = {
     isNormalUser = true;
     description = "Vittorio Cancino Gonzalez";
-    extraGroups = [ "networkmanager" "wheel" "video" ];
+    extraGroups = [ "networkmanager" "wheel" "video" "docker" ];
     shell = pkgs.zsh;
   };
 
