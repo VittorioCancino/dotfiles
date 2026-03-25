@@ -15,6 +15,7 @@
     discord
     docker-compose
     bun
+    spotify
 
     # Toggle mic mute and sync the ThinkPad mic LED
     (writeShellScriptBin "toggle-mic" ''

@@ -1,7 +1,7 @@
 { pkgs, ... }:
 
 {
-  home.packages = [ pkgs.fastfetch ];
+  home.packages = [ pkgs.fastfetch pkgs.prisma-engines pkgs.openssl ];
 
   home.file.".config/fastfetch/config.jsonc".text = ''
     {
@@ -49,7 +49,10 @@
     syntaxHighlighting.enable = true;
     initContent = "printf '\\e[?25l'; fastfetch; printf '\\e[?25h'";
     sessionVariables = {
-        PRISMA_SCHEMA_ENGINE_BINARY = "/nix/store/np8d1lbcv5xhqxs1laa390rjlmscnrad-prisma-engines_7-7.3.0/bin/schema-engine";
+        PRISMA_SCHEMA_ENGINE_BINARY    = "${pkgs.prisma-engines}/bin/schema-engine";
+        PRISMA_QUERY_ENGINE_BINARY     = "${pkgs.prisma-engines}/bin/query-engine";
+        PRISMA_FMT_BINARY              = "${pkgs.prisma-engines}/bin/prisma-fmt";
+        PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING = "1";
       };
 
     shellAliases = {

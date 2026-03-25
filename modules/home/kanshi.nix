@@ -16,9 +16,9 @@
           name = "triple";
           exec = [ "set-wallpaper" ];
           outputs = [
-            { criteria = "eDP-1";    mode = "2880x1800@120"; position = "0,0";    scale = 2.0; }
-            { criteria = "DP-1";     mode = "1920x1080@120"; position = "1440,0"; scale = 1.0; }
-            { criteria = "HDMI-A-1"; mode = "1920x1080@120"; position = "3360,0"; scale = 1.0; transform = "90"; }
+            { criteria = "eDP-1"; mode = "2880x1800@120";  position = "0,0";    scale = 2.0; }
+            { criteria = "DP-9";  mode = "1920x1080@120";  position = "1440,0"; scale = 1.0; }
+            { criteria = "DP-11"; mode = "1920x1080@240"; position = "3360,0"; scale = 1.0; }
           ];
         };
       }
@@ -37,7 +37,7 @@
           name = "laptop-only";
           exec = [ "set-wallpaper" ];
           outputs = [
-            { criteria = "eDP-1"; mode = "2880x1800@60"; position = "0,0"; scale = 2.0; }
+            { criteria = "eDP-1"; mode = "2880x1800@120"; position = "0,0"; scale = 2.0; }
           ];
         };
       }

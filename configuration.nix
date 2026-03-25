@@ -10,6 +10,7 @@
     ./modules/system/audio.nix
     ./modules/system/bluetooth.nix
     ./modules/system/sddm.nix
+    ./modules/system/thinkfan.nix
   ];
 
   # Bootloader.
@@ -96,6 +97,12 @@
   };
 
   nixpkgs.config.allowUnfree = true;
+
+  # Disable USB autosuspend for the integrated camera (Chicony 04f2:b840)
+  # It fails to resume from suspend (-EINVAL) and gets permanently disconnected
+  services.udev.extraRules = ''
+    ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="04f2", ATTRS{idProduct}=="b840", ATTR{power/autosuspend}="-1"
+  '';
 
   environment.systemPackages = with pkgs; [
     vim
