@@ -39,6 +39,9 @@
   networking.hostName = "nixos";
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
+  services.tailscale.enable = true;
+  networking.firewall.trustedInterfaces = [ "tailscale0" ];
+
   networking.networkmanager.enable = true;
   networking.networkmanager.dispatcherScripts = [{
     source = pkgs.writeShellScript "waybar-network-dispatch" ''
@@ -86,6 +89,10 @@
   };
 
   programs.zsh.enable = true;
+
+  programs.nix-ld = {
+    enable = true;
+  };
 
   # Keyring — auto-unlocked by SDDM on login via PAM
   services.gnome.gnome-keyring.enable = true;

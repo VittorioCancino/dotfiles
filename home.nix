@@ -17,6 +17,12 @@
     bun
     spotify
 
+    # LaTeX
+    (texlive.combine {
+      inherit (texlive) scheme-medium enumitem needspace;
+    })
+    texlab
+
     # Toggle mic mute and sync the ThinkPad mic LED
     (writeShellScriptBin "toggle-mic" ''
       wpctl set-source-mute @DEFAULT_SOURCE@ toggle
@@ -33,6 +39,11 @@
   ];
 
   programs.zed-editor.enable = true;
+
+  programs.direnv = {
+    enable = true;
+    nix-direnv.enable = true;
+  };
   services.ssh-agent.enable = true;
 
   home.file.".face".source = ./assets/avatar.png;
