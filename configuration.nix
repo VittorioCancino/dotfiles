@@ -92,6 +92,9 @@
 
   programs.nix-ld = {
     enable = true;
+    libraries = with pkgs; [
+      libcap
+    ];
   };
 
   # Keyring — auto-unlocked by SDDM on login via PAM
