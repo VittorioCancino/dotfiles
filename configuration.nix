@@ -94,7 +94,12 @@
     enable = true;
     libraries = with pkgs; [
       libcap
+      stdenv.cc.cc.lib  # libstdc++.so.6 for manylinux binary wheels (e.g. pyzmq)
     ];
+  };
+
+  environment.variables = {
+    LD_LIBRARY_PATH = "/run/current-system/sw/share/nix-ld/lib";
   };
 
   # Keyring — auto-unlocked by SDDM on login via PAM

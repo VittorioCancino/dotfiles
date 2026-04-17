@@ -5,7 +5,7 @@
     enable = true;
 
     settings = [{
-      layer     = "overlay";
+      layer     = "top";
       position  = "top";
       exclusive = false;
       margin-top   = 8;

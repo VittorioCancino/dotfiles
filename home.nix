@@ -1,5 +1,9 @@
 { config, pkgs, inputs, ... }:
-
+let
+  latexPackages = with pkgs.texlive; pkgs.texlive.combine {
+    inherit scheme-full latexmk biber chktex;
+  };
+in
 {
   home.username = "vitto";
   home.homeDirectory = "/home/vitto";
@@ -8,20 +12,28 @@
   nixpkgs.config.allowUnfree = true;
 
   home.packages = with pkgs; [
-    vscode
     firefox
+    vscode
     thunar
     nodejs
+    pnpm
     discord
     docker-compose
     bun
     spotify
+    gcc
+    glibc.dev
+    clang-tools
+    python3
+
 
     # LaTeX
-    (texlive.combine {
-      inherit (texlive) scheme-medium enumitem needspace;
-    })
+    latexPackages
     texlab
+    gnumake
+    zathura
+
+    ripgrep
 
     # Toggle mic mute and sync the ThinkPad mic LED
     (writeShellScriptBin "toggle-mic" ''
@@ -38,13 +50,46 @@
     '')
   ];
 
-  programs.zed-editor.enable = true;
+  programs.zed-editor = {
+    enable = true;
+    extensions = [ "latex" ];
+    extraPackages = [
+      latexPackages
+      pkgs.texlab
+      pkgs.gnumake
+      pkgs.gcc
+      pkgs.glibc.dev
+      pkgs.clang-tools
+    ];
+    userSettings = {
+      lsp.texlab = {
+        binary = {
+          path = "${pkgs.texlab}/bin/texlab";
+          ignore_system_version = true;
+        };
+        settings.texlab.build = {
+          executable = "${latexPackages}/bin/latexmk";
+          args = [
+            "-pdf"
+            "-interaction=nonstopmode"
+            "-synctex=1"
+            "%f"
+          ];
+          onSave = true;
+          forwardSearchAfter = false;
+        };
+      };
+      languages.LaTeX = {
+        enable_language_server = true;
+        format_on_save = "off";
+      };
+    };
+  };
 
   programs.direnv = {
     enable = true;
     nix-direnv.enable = true;
   };
-  services.ssh-agent.enable = true;
 
   home.file.".face".source = ./assets/avatar.png;
 
