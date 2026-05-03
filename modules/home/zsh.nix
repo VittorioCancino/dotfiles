@@ -27,8 +27,6 @@
         { "type": "custom",      "format": "╭──────────────── Software ────────────────╮" },
         { "type": "os",          "key": "│   OS" },
         { "type": "kernel",      "key": "│ 󰌽  Kernel" },
-        { "type": "packages",    "key": "│ 󰏗  Packages" },
-        { "type": "wm",          "key": "│ 󰕮  WM" },
         { "type": "shell",       "key": "│  Shell" },
         { "type": "terminal",    "key": "│  Terminal" },
         { "type": "custom",      "format": "╰──────────────────────────────────────────╯" },

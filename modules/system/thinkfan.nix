@@ -7,18 +7,20 @@
   services.thinkfan = {
     enable = true;
 
-    # Use the thinkpad hwmon sensor (CPU temp, index 0 = temp1_input)
+    # Use the thinkpad hwmon sensor (CPU temp, index 1 = temp1_input)
     # and k10temp as a secondary source
     sensors = [
       {
         type = "hwmon";
-        query = "thinkpad";
-        indices = [ 0 ]; # temp1_input → CPU
+        query = "/sys/class/hwmon";
+        name = "thinkpad";
+        indices = [ 1 ]; # temp1_input -> CPU
       }
       {
         type = "hwmon";
-        query = "k10temp";
-        indices = [ 0 ]; # Tctl
+        query = "/sys/class/hwmon";
+        name = "k10temp";
+        indices = [ 1 ]; # Tctl
       }
     ];
 

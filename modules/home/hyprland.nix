@@ -16,7 +16,7 @@
     settings = {
       monitor = ",preferred,auto,auto";
 
-      "$terminal" = "wezterm";
+      "$terminal" = "alacritty";
       "$mod" = "ALT";
       "$menu" = "rofi -show drun";
 
@@ -75,7 +75,6 @@
 
 
       dwindle = {
-        pseudotile = true;
         preserve_split = true;
       };
 
@@ -97,7 +96,7 @@
         "$mod, Q, exec, $terminal"
         "$mod, R, exec, $menu"
         "$mod SHIFT, P, exec, rofi-powermenu"
-        "$mod, F, exec, wezterm start -- yazi"
+        "$mod, F, exec, alacritty -e yazi"
 
         # Window management
         "$mod, C, killactive"

@@ -16,8 +16,8 @@
 
       eww-overlay-open
 
-      # Pre-warm image cache so rofi loads it from RAM
-      cat ~/.cache/rofi-wallpaper.jpg > /dev/null
+      # Pre-warm image cache so rofi loads it from RAM, if a wallpaper has been set.
+      [ -f ~/.cache/rofi-wallpaper.jpg ] && cat ~/.cache/rofi-wallpaper.jpg > /dev/null
 
       chosen="$(printf '%s\n' "$shutdown" "$reboot" "$suspend" "$logout" "$lock" \
         | rofi -dmenu \
@@ -294,4 +294,5 @@
       horizontal-align: 0.5;
     }
   '';
+
 }

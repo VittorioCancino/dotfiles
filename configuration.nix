@@ -84,7 +84,7 @@
   users.users.vitto = {
     isNormalUser = true;
     description = "Vittorio Cancino Gonzalez";
-    extraGroups = [ "networkmanager" "wheel" "video" "docker" ];
+    extraGroups = [ "networkmanager" "wheel" "video" "docker" "i2c" ];
     shell = pkgs.zsh;
   };
 
@@ -113,6 +113,8 @@
 
   nixpkgs.config.allowUnfree = true;
 
+  hardware.i2c.enable = true;
+
   # Disable USB autosuspend for the integrated camera (Chicony 04f2:b840)
   # It fails to resume from suspend (-EINVAL) and gets permanently disconnected
   services.udev.extraRules = ''
@@ -125,6 +127,7 @@
     jq
     libnotify
     brightnessctl
+    ddcutil
     gnome-keyring
     libsecret
     gcr_4

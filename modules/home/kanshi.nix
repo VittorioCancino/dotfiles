@@ -24,11 +24,21 @@
       }
       {
         profile = {
+          name = "dual-asus";
+          exec = [ "set-wallpaper" ];
+          outputs = [
+            { criteria = "eDP-1";                                      mode = "2880x1800@120";   position = "0,0";    scale = 2.0; }
+            { criteria = "ASUSTek COMPUTER INC XG27AQDMG T6LMRS043289"; mode = "2560x1440@239.97"; position = "1440,0"; scale = 1.0; }
+          ];
+        };
+      }
+      {
+        profile = {
           name = "dual-samsung";
           exec = [ "set-wallpaper" ];
           outputs = [
-            { criteria = "Samsung Electric Company S24F350 H4ZM500517"; mode = "1920x1080@60"; position = "0,0";    scale = 1.0; }
-            { criteria = "eDP-1";                              mode = "2880x1800@120"; position = "1920,0"; scale = 2.0; }
+            { criteria = "eDP-1";                              mode = "2880x1800@120"; position = "0,0";    scale = 2.0; }
+            { criteria = "Samsung Electric Company S24F350 H4ZM500517"; mode = "1920x1080@60"; position = "1440,0"; scale = 1.0; }
           ];
         };
       }

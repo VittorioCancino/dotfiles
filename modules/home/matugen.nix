@@ -6,9 +6,9 @@
     [config]
     reload_gtk_theme = false
 
-    [templates.wezterm]
-    input_path  = "~/.config/matugen/templates/wezterm.lua"
-    output_path = "~/.cache/matugen/wezterm-colors.lua"
+    [templates.alacritty]
+    input_path  = "~/.config/matugen/templates/alacritty-colors.toml"
+    output_path = "~/.cache/matugen/alacritty-colors.toml"
 
     [templates.waybar]
     input_path  = "~/.config/matugen/templates/waybar.css"
@@ -40,40 +40,39 @@
 
   '';
 
-  # WezTerm color template using Material You palette
-  home.file.".config/matugen/templates/wezterm.lua".text = ''
-    return {
-      foreground = "{{colors.on_surface.default.hex}}",
-      background = "{{colors.surface.default.hex}}",
+  # Alacritty color template using Material You palette
+  home.file.".config/matugen/templates/alacritty-colors.toml".text = ''
+    [colors.primary]
+    background = "{{colors.surface.default.hex}}"
+    foreground = "{{colors.on_surface.default.hex}}"
 
-      cursor_bg     = "{{colors.primary.default.hex}}",
-      cursor_fg     = "{{colors.on_primary.default.hex}}",
-      cursor_border = "{{colors.primary.default.hex}}",
+    [colors.cursor]
+    text = "{{colors.on_primary.default.hex}}"
+    cursor = "{{colors.primary.default.hex}}"
 
-      selection_bg = "{{colors.primary_container.default.hex}}",
-      selection_fg = "{{colors.on_primary_container.default.hex}}",
+    [colors.selection]
+    text = "{{colors.on_primary_container.default.hex}}"
+    background = "{{colors.primary_container.default.hex}}"
 
-      ansi = {
-        "{{colors.surface_variant.default.hex}}",
-        "{{colors.error.default.hex}}",
-        "{{colors.tertiary.default.hex}}",
-        "{{colors.secondary.default.hex}}",
-        "{{colors.primary.default.hex}}",
-        "{{colors.tertiary_container.default.hex}}",
-        "{{colors.secondary_container.default.hex}}",
-        "{{colors.on_surface.default.hex}}",
-      },
-      brights = {
-        "{{colors.outline.default.hex}}",
-        "{{colors.error_container.default.hex}}",
-        "{{colors.on_tertiary.default.hex}}",
-        "{{colors.on_secondary.default.hex}}",
-        "{{colors.on_primary.default.hex}}",
-        "{{colors.on_tertiary_container.default.hex}}",
-        "{{colors.on_secondary_container.default.hex}}",
-        "{{colors.on_background.default.hex}}",
-      },
-    }
+    [colors.normal]
+    black = "{{colors.surface_variant.default.hex}}"
+    red = "{{colors.error.default.hex}}"
+    green = "{{colors.tertiary.default.hex}}"
+    yellow = "{{colors.secondary.default.hex}}"
+    blue = "{{colors.primary.default.hex}}"
+    magenta = "{{colors.tertiary_container.default.hex}}"
+    cyan = "{{colors.secondary_container.default.hex}}"
+    white = "{{colors.on_surface.default.hex}}"
+
+    [colors.bright]
+    black = "{{colors.outline.default.hex}}"
+    red = "{{colors.error_container.default.hex}}"
+    green = "{{colors.on_tertiary.default.hex}}"
+    yellow = "{{colors.on_secondary.default.hex}}"
+    blue = "{{colors.on_primary.default.hex}}"
+    magenta = "{{colors.on_tertiary_container.default.hex}}"
+    cyan = "{{colors.on_secondary_container.default.hex}}"
+    white = "{{colors.on_background.default.hex}}"
   '';
 
   # Hyprlock color template
