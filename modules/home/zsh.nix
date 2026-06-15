@@ -51,7 +51,6 @@
         PRISMA_QUERY_ENGINE_BINARY     = "${pkgs.prisma-engines}/bin/query-engine";
         PRISMA_FMT_BINARY              = "${pkgs.prisma-engines}/bin/prisma-fmt";
         PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING = "1";
-        LD_LIBRARY_PATH = "/run/current-system/sw/share/nix-ld/lib";
       };
 
     shellAliases = {
