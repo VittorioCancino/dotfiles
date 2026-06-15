@@ -1,4 +1,4 @@
-{ ... }:
+{ homeDirectory, ... }:
 
 {
   programs.hyprlock = {
@@ -13,7 +13,7 @@
       }
 
       background {
-        path        = /home/vitto/.cache/current-wallpaper.img
+        path        = ${homeDirectory}/.cache/current-wallpaper.img
         blur_passes = 3
         blur_size   = 8
         brightness  = 0.6

@@ -1,4 +1,4 @@
-{ ... }:
+{ homeDirectory, ... }:
 
 {
   programs.waybar = {
@@ -14,7 +14,7 @@
 
       modules-left   = [ "custom/nixos" "cpu" "memory" "temperature" "hyprland/window" ];
       modules-center = [ "hyprland/workspaces" ];
-      modules-right  = [ "custom/network" "backlight" "pulseaudio" "battery" "clock" ];
+      modules-right  = [ "custom/opencode" "custom/network" "backlight" "pulseaudio" "battery" "clock" ];
 
       "custom/nixos" = {
         format   = "󱄅";
@@ -77,6 +77,14 @@
         tooltip     = true;
       };
 
+      "custom/opencode" = {
+        exec        = "waybar-opencode";
+        return-type = "json";
+        signal      = 9;
+        interval    = 2;
+        tooltip     = true;
+      };
+
       "battery" = {
         format          = "{icon} {capacity}%";
         format-charging = "{icon}󱐋 {capacity}%";
@@ -101,7 +109,7 @@
     }];
 
     style = ''
-      @import url("/home/vitto/.cache/matugen/waybar.css");
+      @import url("${homeDirectory}/.cache/matugen/waybar.css");
 
       * {
         border:        none;
@@ -179,6 +187,27 @@
       }
 
       /* Right */
+      #custom-opencode {
+        color:         @primary;
+        padding:       0 10px;
+        border-radius: 8px;
+      }
+
+      #custom-opencode.busy {
+        background-color: @primary;
+        color:            @on_primary;
+        font-weight:      bold;
+      }
+
+      #custom-opencode.idle {
+        color: @primary;
+      }
+
+      #custom-opencode.empty {
+        padding: 0;
+        margin:  0;
+      }
+
       #custom-network {
         color:   @tertiary;
         padding: 0 14px;
@@ -232,4 +261,5 @@
   wayland.windowManager.hyprland.settings = {
     exec-once = [ "waybar" ];
   };
+
 }

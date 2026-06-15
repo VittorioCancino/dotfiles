@@ -1,31 +1,28 @@
 { ... }:
 
 {
-  # Allow thinkpad_acpi to control the fan
+  # Allow thinkpad_acpi to control the fan.
   boot.extraModprobeConfig = "options thinkpad_acpi fan_control=1";
 
   services.thinkfan = {
     enable = true;
 
-    # Use the thinkpad hwmon sensor (CPU temp, index 1 = temp1_input)
-    # and k10temp as a secondary source
+    # Use the ThinkPad hwmon sensor and k10temp as a secondary source.
     sensors = [
       {
         type = "hwmon";
         query = "/sys/class/hwmon";
         name = "thinkpad";
-        indices = [ 1 ]; # temp1_input -> CPU
+        indices = [ 1 ];
       }
       {
         type = "hwmon";
         query = "/sys/class/hwmon";
         name = "k10temp";
-        indices = [ 1 ]; # Tctl
+        indices = [ 1 ];
       }
     ];
 
-    # [fan_level  low_°C  high_°C]
-    # Fan kicks in at 42°C instead of waiting until it gets hot
     levels = [
       [ 0   0  42 ]
       [ 1  40  48 ]

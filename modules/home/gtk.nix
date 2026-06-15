@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, homeDirectory, ... }:
 
 {
   gtk = {
@@ -22,7 +22,7 @@
     };
 
     gtk3.extraCss = ''
-      @import url("file:///home/vitto/.cache/matugen/gtk-colors.css");
+      @import url("file://${homeDirectory}/.cache/matugen/gtk-colors.css");
 
       headerbar {
         background-color: @accent_bg_color;
@@ -31,7 +31,7 @@
     '';
 
     gtk4.extraCss = ''
-      @import url("file:///home/vitto/.cache/matugen/gtk-colors.css");
+      @import url("file://${homeDirectory}/.cache/matugen/gtk-colors.css");
     '';
   };
 

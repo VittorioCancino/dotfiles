@@ -1,17 +1,35 @@
-{ pkgs, inputs, ... }:
+{ config, lib, pkgs, inputs, ... }:
 
+let
+  cfg = config.local.machine;
+in
 {
-  wayland.windowManager.hyprland = {
-    enable = true;
-    package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
-    systemd.enable = true;
-    extraConfig = ''
-      source = ~/.cache/matugen/hyprland-colors.conf
-      general {
-        col.active_border = $col_active_border
-        col.inactive_border = $col_inactive_border
-      }
-    '';
+  options.local.machine = {
+    tabletOutput = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = "Hyprland output name to bind drawing tablet input to.";
+    };
+
+    bindF4MicMute = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Bind plain F4 to mic mute for firmware that does not emit XF86AudioMicMute.";
+    };
+  };
+
+  config.wayland.windowManager.hyprland = {
+      enable = true;
+      configType = "hyprlang";
+      package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
+      systemd.enable = true;
+      extraConfig = ''
+        source = ~/.cache/matugen/hyprland-colors.conf
+        general {
+          col.active_border = $col_active_border
+          col.inactive_border = $col_inactive_border
+        }
+      '';
 
     settings = {
       monitor = ",preferred,auto,auto";
@@ -32,6 +50,8 @@
         touchpad = {
           natural_scroll = false;
         };
+      } // lib.optionalAttrs (cfg.tabletOutput != null) {
+        tablet.output = cfg.tabletOutput;
       };
 
       general = {
@@ -88,6 +108,7 @@
 
       layerrule = [
         "blur on, match:namespace eww-overlay"
+        "animation fade, match:namespace rofi"
       ];
 
 
@@ -153,10 +174,10 @@
       bindl = [
         ", XF86AudioMute,        exec, toggle-mute"
         ", XF86AudioMicMute,     exec, toggle-mic"
-        # F4 = mic mute on ThinkPad (thinkpad_acpi sends plain F4 instead of XF86AudioMicMute)
-        ", F4,                   exec, toggle-mic"
         ", XF86MonBrightnessUp,  exec, brightnessctl set 5%+"
         ", XF86MonBrightnessDown,exec, brightnessctl set 5%-"
+      ] ++ lib.optionals cfg.bindF4MicMute [
+        ", F4,                   exec, toggle-mic"
       ];
 
       bindle = [

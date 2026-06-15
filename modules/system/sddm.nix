@@ -1,24 +1,29 @@
-{ pkgs, inputs, ... }:
+{ config, lib, pkgs, ... }:
 
+let
+  username = config.local.user.name;
+in
 {
-  services.accounts-daemon.enable = true;
-  systemd.tmpfiles.rules = [
-    "L+ /var/lib/AccountsService/icons/vitto - - - - ${../../assets/avatar.png}"
-  ];
-
-  services.displayManager.sddm = {
-    enable = true;
-    wayland.enable = true;
-    theme = "silent";
-    extraPackages = with pkgs.kdePackages; [
-      qtmultimedia
-      qtsvg
-      qtvirtualkeyboard
-      layer-shell-qt
-      pkgs.qt6.qtwayland
+  config = lib.mkIf config.local.features.sddm.enable {
+    services.accounts-daemon.enable = true;
+    systemd.tmpfiles.rules = [
+      "L+ /var/lib/AccountsService/icons/${username} - - - - ${../../assets/avatar.png}"
     ];
-    settings = {
-      Wayland.EnableHiDPI = true;
+
+    services.displayManager.sddm = {
+      enable = true;
+      wayland.enable = true;
+      theme = "silent";
+      extraPackages = with pkgs.kdePackages; [
+        qtmultimedia
+        qtsvg
+        qtvirtualkeyboard
+        layer-shell-qt
+        pkgs.qt6.qtwayland
+      ];
+      settings = {
+        Wayland.EnableHiDPI = true;
+      };
     };
   };
 }
