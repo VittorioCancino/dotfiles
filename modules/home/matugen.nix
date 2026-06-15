@@ -1,4 +1,4 @@
-{ ... }:
+{ lib, pkgs, ... }:
 
 {
   # matugen config — points to templates and their output paths
@@ -38,6 +38,35 @@
     input_path  = "~/.config/matugen/templates/yazi-theme.toml"
     output_path = "~/.config/yazi/theme.toml"
 
+  '';
+
+  home.activation.bootstrapMatugenColors = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+    fallback_wallpaper="${../../assets/avatar.png}"
+    missing_matugen_output=0
+
+    for output in \
+      "$HOME/.cache/matugen/alacritty-colors.toml" \
+      "$HOME/.cache/matugen/waybar.css" \
+      "$HOME/.cache/matugen/hyprlock-colors.conf" \
+      "$HOME/.cache/matugen/rofi-colors.rasi" \
+      "$HOME/.cache/matugen/hyprland-colors.conf" \
+      "$HOME/.cache/matugen/gtk-colors.css" \
+      "$HOME/.config/mako/config" \
+      "$HOME/.config/yazi/theme.toml"; do
+      if [ ! -f "$output" ]; then
+        missing_matugen_output=1
+        break
+      fi
+    done
+
+    if [ "$missing_matugen_output" -eq 1 ]; then
+      if [ -f "$fallback_wallpaper" ]; then
+        $DRY_RUN_CMD mkdir -p "$HOME/.cache/matugen" "$HOME/.config/mako" "$HOME/.config/yazi"
+        $DRY_RUN_CMD ${pkgs.matugen}/bin/matugen image "$fallback_wallpaper" --source-color-index 0 --quiet
+      else
+        echo "Skipping matugen color bootstrap; fallback wallpaper not found: $fallback_wallpaper"
+      fi
+    fi
   '';
 
   # Alacritty color template using Material You palette

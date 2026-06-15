@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 
 let
   wallpaperPickerPython = pkgs.python3.withPackages (pythonPackages: with pythonPackages; [
@@ -388,19 +388,62 @@ in
     (writeShellScriptBin "set-wallpaper" ''
       WALLPAPER="$1"
       TRANSITION="''${2:-grow}"
+      DEFAULT_WALLPAPER="${../../assets/avatar.png}"
 
-      # If no argument given, restore last used wallpaper
+      # If no argument given, restore last used wallpaper or fall back to redforest.
       if [ -z "$WALLPAPER" ]; then
         WALLPAPER=$(cat ~/.cache/current-wallpaper 2>/dev/null)
+        if [ -z "$WALLPAPER" ] || [ ! -f "$WALLPAPER" ]; then
+          WALLPAPER="$DEFAULT_WALLPAPER"
+        fi
       fi
 
       if [ -z "$WALLPAPER" ] || [ ! -f "$WALLPAPER" ]; then
         echo "Usage: set-wallpaper <path> [transition]"
         echo "Transitions: wipe fade slide wave grow outer random"
+        echo "Fallback wallpaper not found: $DEFAULT_WALLPAPER"
         exit 1
       fi
 
       mkdir -p ~/.cache
+
+      COLOR_CACHE_VERSION=1
+      CACHE_KEY=$(
+        printf '%s:%s:%s:%s' "$COLOR_CACHE_VERSION" "$WALLPAPER" "$(stat -c '%s' "$WALLPAPER")" "$(stat -c '%Y' "$WALLPAPER")" \
+          | sha1sum \
+          | cut -d ' ' -f1
+      )
+      COLOR_CACHE_DIR="$HOME/.cache/wallpaper-colors/$CACHE_KEY"
+
+      restore_color_cache() {
+        [ -f "$COLOR_CACHE_DIR/.complete" ] || return 1
+        mkdir -p "$HOME/.cache/matugen" "$HOME/.config/mako" "$HOME/.config/yazi"
+
+        cp "$COLOR_CACHE_DIR/alacritty-colors.toml" "$HOME/.cache/matugen/alacritty-colors.toml" || return 1
+        cp "$COLOR_CACHE_DIR/waybar.css" "$HOME/.cache/matugen/waybar.css" || return 1
+        cp "$COLOR_CACHE_DIR/hyprlock-colors.conf" "$HOME/.cache/matugen/hyprlock-colors.conf" || return 1
+        cp "$COLOR_CACHE_DIR/rofi-colors.rasi" "$HOME/.cache/matugen/rofi-colors.rasi" || return 1
+        cp "$COLOR_CACHE_DIR/hyprland-colors.conf" "$HOME/.cache/matugen/hyprland-colors.conf" || return 1
+        cp "$COLOR_CACHE_DIR/gtk-colors.css" "$HOME/.cache/matugen/gtk-colors.css" || return 1
+        cp "$COLOR_CACHE_DIR/mako.conf" "$HOME/.config/mako/config" || return 1
+        cp "$COLOR_CACHE_DIR/yazi-theme.toml" "$HOME/.config/yazi/theme.toml" || return 1
+      }
+
+      save_color_cache() {
+        mkdir -p "$COLOR_CACHE_DIR"
+        rm -f "$COLOR_CACHE_DIR/.complete"
+
+        cp "$HOME/.cache/matugen/alacritty-colors.toml" "$COLOR_CACHE_DIR/alacritty-colors.toml" || return 1
+        cp "$HOME/.cache/matugen/waybar.css" "$COLOR_CACHE_DIR/waybar.css" || return 1
+        cp "$HOME/.cache/matugen/hyprlock-colors.conf" "$COLOR_CACHE_DIR/hyprlock-colors.conf" || return 1
+        cp "$HOME/.cache/matugen/rofi-colors.rasi" "$COLOR_CACHE_DIR/rofi-colors.rasi" || return 1
+        cp "$HOME/.cache/matugen/hyprland-colors.conf" "$COLOR_CACHE_DIR/hyprland-colors.conf" || return 1
+        cp "$HOME/.cache/matugen/gtk-colors.css" "$COLOR_CACHE_DIR/gtk-colors.css" || return 1
+        cp "$HOME/.config/mako/config" "$COLOR_CACHE_DIR/mako.conf" || return 1
+        cp "$HOME/.config/yazi/theme.toml" "$COLOR_CACHE_DIR/yazi-theme.toml" || return 1
+
+        touch "$COLOR_CACHE_DIR/.complete"
+      }
 
       # Set wallpaper
       awww img "$WALLPAPER" \
@@ -411,11 +454,12 @@ in
       echo "$WALLPAPER" > ~/.cache/current-wallpaper
       ln -sf "$WALLPAPER" ~/.cache/current-wallpaper.img
 
-      # Generate resized copy for rofi card (fast load, no decode lag)
-      magick "$WALLPAPER" -resize 600x ~/.cache/rofi-wallpaper.jpg 2>/dev/null || true
-
-      # Generate color palette (pick most prominent color automatically)
-      matugen image "$WALLPAPER" --source-color-index 0
+      # Generate or restore color palette (pick most prominent color automatically)
+      if ! restore_color_cache; then
+        if matugen image "$WALLPAPER" --source-color-index 0; then
+          save_color_cache || true
+        fi
+      fi
 
       # Reload waybar CSS
       pkill -SIGUSR2 waybar
@@ -428,11 +472,28 @@ in
 
       # Reload GTK theme so running apps pick up new colors
       gsettings set org.gnome.desktop.interface gtk-theme 'adw-gtk3-dark' 2>/dev/null || true
+
+      # Generate resized copy for rofi card (fast load, no decode lag)
+      magick "$WALLPAPER" -resize 600x ~/.cache/rofi-wallpaper.jpg 2>/dev/null || true
     '')
   ];
 
   # Ensure wallpapers directory exists
   home.file."Pictures/wallpapers/.keep".text = "";
+
+  home.activation.bootstrapWallpaperState = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+    fallback_wallpaper="${../../assets/avatar.png}"
+
+    $DRY_RUN_CMD mkdir -p "$HOME/.cache"
+
+    if [ ! -f "$HOME/.cache/current-wallpaper" ]; then
+      $DRY_RUN_CMD ${pkgs.bash}/bin/bash -c 'printf "%s\n" "$1" > "$2"' _ "$fallback_wallpaper" "$HOME/.cache/current-wallpaper"
+    fi
+
+    if [ ! -e "$HOME/.cache/current-wallpaper.img" ]; then
+      $DRY_RUN_CMD ln -sfn "$fallback_wallpaper" "$HOME/.cache/current-wallpaper.img"
+    fi
+  '';
 
   wayland.windowManager.hyprland.settings = {
     exec-once = [
