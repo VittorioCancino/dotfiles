@@ -8,10 +8,20 @@ let
     system = pkgs.stdenv.hostPlatform.system;
     config.allowUnfree = true;
   };
+
+  opencode = pkgs.symlinkJoin {
+    name = "opencode-wrapped";
+    paths = [ opencodePkgs.opencode ];
+    nativeBuildInputs = [ pkgs.makeWrapper ];
+    postBuild = ''
+      wrapProgram $out/bin/opencode \
+        --prefix LD_LIBRARY_PATH : ${pkgs.lib.makeLibraryPath [ opencodePkgs.stdenv.cc.cc.lib ]}
+    '';
+  };
 in
 {
   home.packages = with pkgs; [
-    opencodePkgs.opencode
+    opencode
     nodejs
     pnpm
     docker-compose

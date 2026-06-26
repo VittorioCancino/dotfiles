@@ -115,6 +115,7 @@ in
       bind = [
         # Apps
         "$mod, Q, exec, $terminal"
+        "$mod SHIFT, Q, exec, terminal-here"
         "$mod, R, exec, $menu"
         "$mod SHIFT, P, exec, rofi-powermenu"
         "$mod, F, exec, alacritty -e yazi"

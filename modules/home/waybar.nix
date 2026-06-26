@@ -14,7 +14,7 @@
 
       modules-left   = [ "custom/nixos" "cpu" "memory" "temperature" "hyprland/window" ];
       modules-center = [ "hyprland/workspaces" ];
-      modules-right  = [ "custom/opencode" "custom/network" "backlight" "pulseaudio" "battery" "clock" ];
+      modules-right  = [ "custom/opencode" "custom/network" "custom/focus" "backlight" "pulseaudio" "battery" "clock" ];
 
       "custom/nixos" = {
         format   = "󱄅";
@@ -82,6 +82,15 @@
         return-type = "json";
         signal      = 9;
         interval    = 2;
+        tooltip     = true;
+      };
+
+      "custom/focus" = {
+        exec        = "waybar-focus";
+        return-type = "json";
+        signal      = 10;
+        interval    = 2;
+        on-click    = "waybar-focus toggle";
         tooltip     = true;
       };
 
@@ -211,6 +220,21 @@
       #custom-network {
         color:   @tertiary;
         padding: 0 14px;
+      }
+
+      #custom-focus {
+        color:         @on_primary_container;
+        padding:       0 12px;
+        border-radius: 8px;
+      }
+
+      #custom-focus.enabled {
+        color:       @primary;
+        font-weight: bold;
+      }
+
+      #custom-focus.offline {
+        color: @error;
       }
 
       #backlight {

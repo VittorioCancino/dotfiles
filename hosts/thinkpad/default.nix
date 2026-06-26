@@ -26,6 +26,8 @@ in
 
   # Keep the kernel version where Bluetooth is known to work on this machine.
   boot.kernelPackages = oldKernelPkgs.linuxPackages;
+  # Work around AMDGPU MES hangs on Ryzen AI / Radeon 840M-class hardware.
+  boot.kernelParams = [ "amdgpu.mes=0" "amdgpu.uni_mes=0" ];
 
   local.audio.bluetoothA2dpDeviceNames = [
     "bluez_card.60_AB_D2_7A_05_7A"

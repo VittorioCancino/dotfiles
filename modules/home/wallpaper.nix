@@ -407,7 +407,7 @@ in
 
       mkdir -p ~/.cache
 
-      COLOR_CACHE_VERSION=1
+      COLOR_CACHE_VERSION=2
       CACHE_KEY=$(
         printf '%s:%s:%s:%s' "$COLOR_CACHE_VERSION" "$WALLPAPER" "$(stat -c '%s' "$WALLPAPER")" "$(stat -c '%Y' "$WALLPAPER")" \
           | sha1sum \
@@ -462,7 +462,9 @@ in
       fi
 
       # Reload waybar CSS
-      pkill -SIGUSR2 waybar
+      for process in '[.]waybar-wrapped' waybar; do
+        ${pkgs.procps}/bin/pkill -x -SIGUSR2 -- "$process" || true
+      done
 
       # Reload mako with new colors
       makoctl reload 2>/dev/null || true

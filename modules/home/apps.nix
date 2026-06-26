@@ -1,8 +1,12 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 
+let
+  chromiumBin = "${pkgs.chromium}/bin/chromium";
+in
 {
   home.packages = with pkgs; [
     firefox
+    chromium
     vscode
     thunar
     pgadmin4-desktopmode
@@ -29,6 +33,35 @@
       exec ${xdg-utils}/bin/xdg-open "$url"
     '')
   ];
+
+  home.sessionVariables = {
+    CHROME_BIN = chromiumBin;
+    CHROME_EXECUTABLE = chromiumBin;
+    CHROMIUM_BIN = chromiumBin;
+    PUPPETEER_EXECUTABLE_PATH = chromiumBin;
+  };
+
+  home.activation.configureVscodeChromium = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    settings_file="$HOME/.config/Code/User/settings.json"
+    tmp_file="$(${pkgs.coreutils}/bin/mktemp)"
+
+    ${pkgs.coreutils}/bin/mkdir -p "$HOME/.config/Code/User"
+
+    if [ -s "$settings_file" ]; then
+      ${pkgs.jq}/bin/jq '. + {
+        "markdown-pdf.executablePath": "${chromiumBin}",
+        "markdown-pdf.chromium.autoDownload": false
+      }' "$settings_file" > "$tmp_file"
+    else
+      ${pkgs.jq}/bin/jq -n '{
+        "markdown-pdf.executablePath": "${chromiumBin}",
+        "markdown-pdf.chromium.autoDownload": false
+      }' > "$tmp_file"
+    fi
+
+    ${pkgs.coreutils}/bin/install -m 0644 "$tmp_file" "$settings_file"
+    ${pkgs.coreutils}/bin/rm -f "$tmp_file"
+  '';
 
   xfconf.settings.thunar = {
     "default-view" = "ThunarDetailsView";

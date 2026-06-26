@@ -69,6 +69,15 @@
     fi
   '';
 
+  home.activation.ensureMakoFocusMode = lib.hm.dag.entryAfter [ "bootstrapMatugenColors" ] ''
+    mako_config="$HOME/.config/mako/config"
+
+    if [ -f "$mako_config" ] && ! ${pkgs.gnugrep}/bin/grep -qx '\[mode=do-not-disturb\]' "$mako_config"; then
+      $DRY_RUN_CMD ${pkgs.bash}/bin/bash -c 'printf "\n[mode=do-not-disturb]\ninvisible=1\n" >> "$1"' _ "$mako_config"
+      $DRY_RUN_CMD ${pkgs.mako}/bin/makoctl reload >/dev/null 2>&1 || true
+    fi
+  '';
+
   # Alacritty color template using Material You palette
   home.file.".config/matugen/templates/alacritty-colors.toml".text = ''
     [colors.primary]
@@ -156,6 +165,9 @@
     default-timeout=5000
     layer=overlay
     anchor=top-right
+
+    [mode=do-not-disturb]
+    invisible=1
   '';
 
   # Hyprland border color template

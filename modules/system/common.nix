@@ -39,7 +39,9 @@ in
     enable = true;
     dispatcherScripts = [{
       source = pkgs.writeShellScript "waybar-network-dispatch" ''
-        ${pkgs.procps}/bin/pkill -u ${user.name} -RTMIN+8 waybar || true
+        for process in '[.]waybar-wrapped' waybar; do
+          ${pkgs.procps}/bin/pkill -x -u ${user.name} -RTMIN+8 -- "$process" || true
+        done
       '';
       type = "basic";
     }];
@@ -83,6 +85,7 @@ in
   };
 
   programs.zsh.enable = true;
+  programs.ssh.startAgent = true;
   programs.xfconf.enable = true;
 
   programs.nix-ld = {
@@ -95,6 +98,7 @@ in
 
   # Keyring auto-unlocked by SDDM on login via PAM.
   services.gnome.gnome-keyring.enable = lib.mkIf features.keyring.enable true;
+  services.gnome.gcr-ssh-agent.enable = false;
   security.pam.services.sddm.enableGnomeKeyring = lib.mkIf (features.sddm.enable && features.keyring.enable) true;
 
   home-manager = {
@@ -119,7 +123,6 @@ in
     ddcutil
     gnome-keyring
     libsecret
-    gcr_4
     inputs.sddm-theme.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 

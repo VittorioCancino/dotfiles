@@ -14,6 +14,7 @@ let
     declare -A client_state
     declare -A client_session
     declare -A client_step
+    declare -A client_directory
 
     write_state() {
       local open=0
@@ -89,13 +90,155 @@ let
       unset "client_state[$client]"
       unset "client_session[$client]"
       unset "client_step[$client]"
+      unset "client_directory[$client]"
+    }
+
+    opencode_process_for_directory_exists() {
+      local directory="$1"
+      local proc=""
+      local comm=""
+      local cwd=""
+
+      [ -n "$directory" ] || return 1
+
+      shopt -s nullglob
+      for proc in /proc/[0-9]*; do
+        [ -r "$proc/comm" ] || continue
+        IFS= read -r comm < "$proc/comm" || continue
+
+        case "$comm" in
+          opencode|.opencode*)
+            ;;
+          *)
+            continue
+            ;;
+        esac
+
+        cwd=$(${pkgs.coreutils}/bin/readlink "$proc/cwd" 2>/dev/null || true)
+        if [ "$cwd" = "$directory" ]; then
+          shopt -u nullglob
+          return 0
+        fi
+      done
+      shopt -u nullglob
+      return 1
+    }
+
+    close_clients_for_directory_except() {
+      local directory="$1"
+      local keep_client="$2"
+      local client=""
+
+      for client in "''${!client_directory[@]}"; do
+        [ "$client" != "$keep_client" ] || continue
+        if [ "''${client_directory[$client]}" = "$directory" ]; then
+          close_client "$client"
+        fi
+      done
+    }
+
+    bootstrap_running_clients() {
+      local proc=""
+      local comm=""
+      local cwd=""
+      local client=""
+
+      shopt -s nullglob
+      for proc in /proc/[0-9]*; do
+        [ -r "$proc/comm" ] || continue
+        IFS= read -r comm < "$proc/comm" || continue
+
+        case "$comm" in
+          opencode|.opencode*)
+            ;;
+          *)
+            continue
+            ;;
+        esac
+
+        cwd=$(${pkgs.coreutils}/bin/readlink "$proc/cwd" 2>/dev/null || true)
+        [ -n "$cwd" ] || continue
+
+        client="pid:''${proc##*/}"
+        client_state[$client]="idle"
+        client_directory[$client]="$cwd"
+      done
+      shopt -u nullglob
+    }
+
+    prune_closed_clients() {
+      local client=""
+      local directory=""
+      local pruned=0
+
+      for client in "''${!client_directory[@]}"; do
+        directory="''${client_directory[$client]}"
+        if ! opencode_process_for_directory_exists "$directory"; then
+          close_client "$client"
+          pruned=1
+        fi
+      done
+
+      [ "$pruned" -eq 1 ]
     }
 
     handle_line() {
       local client="$1"
       local line="$2"
 
-      if [[ "$line" == *"session.updated subscribing"* ]]; then
+      if [[ "$line" == *" run="* ]]; then
+        local run="''${line#* run=}"
+        run="''${run%% *}"
+        [ -n "$run" ] && client="$run"
+      fi
+
+      local directory=""
+      if [[ "$line" == *" directory="* ]]; then
+        directory="''${line#* directory=}"
+        directory="''${directory%% *}"
+      elif [[ "$line" == *" cwd="* ]]; then
+        directory="''${line#* cwd=}"
+        directory="''${directory%% *}"
+      fi
+
+      if [ -n "$directory" ]; then
+        if [ -n "$directory" ] && [ "$directory" != "undefined" ] && opencode_process_for_directory_exists "$directory"; then
+          close_clients_for_directory_except "$directory" "$client"
+          client_directory[$client]="$directory"
+        fi
+      fi
+
+      if [[ "$line" == *' message="creating instance" '* ]]; then
+        client_state[$client]="idle"
+        unset "client_step[$client]"
+      elif [[ "$line" == *" message=created id=ses_"* ]]; then
+        local sid="''${line#* id=}"
+        sid="''${sid%% *}"
+
+        client_state[$client]="idle"
+        client_session[$client]="$sid"
+        unset "client_step[$client]"
+      elif [[ "$line" == *" message=loop session.id="* && "$line" == *" step="* ]]; then
+        local sid="''${line#* session.id=}"
+        sid="''${sid%% *}"
+        local step="''${line#* step=}"
+        step="''${step%% *}"
+
+        client_state[$client]="busy"
+        client_session[$client]="$sid"
+        client_step[$client]="$step"
+      elif [[ "$line" == *' message="exiting loop" session.id='* ]]; then
+        local sid="''${line#* session.id=}"
+        sid="''${sid%% *}"
+
+        client_state[$client]="idle"
+        client_session[$client]="$sid"
+        unset "client_step[$client]"
+      elif [[ "$line" == *" message=failed "* && "$line" == *"Failed to init file picker"* ]]; then
+        if [ -z "''${client_directory[$client]:-}" ]; then
+          close_client "$client"
+        fi
+      elif [[ "$line" == *"session.updated subscribing"* ]]; then
         client_state[$client]="idle"
       elif [[ "$line" == *"worker shutting down"* ]]; then
         close_client "$client"
@@ -145,6 +288,7 @@ let
     done
     shopt -u nullglob
 
+    bootstrap_running_clients
     write_state
 
     while true; do
@@ -172,9 +316,15 @@ let
         fi
       done
 
+      if prune_closed_clients; then
+        changed=1
+      fi
+
       if [ "$changed" -eq 1 ]; then
         write_state
-        ${pkgs.procps}/bin/pkill -x -RTMIN+9 waybar >/dev/null 2>&1 || true
+        for process in '[.]waybar-wrapped' waybar; do
+          ${pkgs.procps}/bin/pkill -x -RTMIN+9 -- "$process" >/dev/null 2>&1 || true
+        done
       fi
 
       sleep 0.2
